@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Time Capsule ⏳</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; user-select:none; }
+  body {
+    background: linear-gradient(135deg, #ffe6ea 0%, #ffc3d0 100%);
+    min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:20px;
+  }
+  .card {
+    background:#fff; border-radius:24px; padding:32px 24px; text-align:center; max-width:380px; width:100%;
+    box-shadow:0 15px 35px rgba(230,80,115,0.2);
+  }
+  h1 { color:#e63956; font-size:22px; margin-bottom:10px; }
+  p { color:#666; font-size:14px; margin-bottom:18px; line-height:1.5; }
+  .countdown { display:flex; justify-content:center; gap:10px; margin:20px 0; }
+  .unit { background:#fff0f3; border-radius:12px; padding:12px 10px; min-width:64px; }
+  .unit .num { font-size:24px; font-weight:800; color:#e63956; }
+  .unit .label { font-size:10px; color:#b06070; text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .locked-icon { font-size:48px; margin-bottom:10px; }
+  .message-box {
+    display:none; background:#fff0f3; border:2px dashed #ff8fa3; border-radius:16px; padding:20px;
+    margin-top:16px; text-align:left; color:#444; font-size:14px; line-height:1.6;
+  }
+  .unlock-date-form { margin-top:10px; }
+  input[type=datetime-local] {
+    padding:10px 14px; border-radius:12px; border:2px solid #ff8fa3; font-size:13px; width:100%; margin-top:6px;
+  }
+  .set-btn {
+    margin-top:10px; padding:10px 20px; border:none; border-radius:50px; background:#ff4769; color:#fff;
+    font-weight:700; font-size:13px; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="locked-icon" id="lockIcon">🔒</div>
+  <h1 id="title">Time Capsule</h1>
+  <p id="subtext">This message is locked until the date below. Come back then!</p>
+
+  <div class="countdown" id="countdown"></div>
+
+  <div class="unlock-date-form" id="setForm">
+    <label style="font-size:12px;color:#b06070;font-weight:700;">Set unlock date &amp; time:</label>
+    <input type="datetime-local" id="unlockInput" />
+    <br>
+    <button class="set-btn" id="setBtn">Lock It In</button>
+  </div>
+
+  <div class="message-box" id="messageBox">
+    Happy unlock day! 🎉 I set this message for today because it means something to me — take a moment, read this slowly, and know that I'm thinking of you right now. 💕
+  </div>
+</div>
+
+<script>
+  const countdownEl = document.getElementById('countdown');
+  const messageBox = document.getElementById('messageBox');
+  const lockIcon = document.getElementById('lockIcon');
+  const title = document.getElementById('title');
+  const subtext = document.getElementById('subtext');
+  const setForm = document.getElementById('setForm');
+  let unlockTime = null;
+  let intervalId = null;
+
+  document.getElementById('setBtn').addEventListener('click', () => {
+    const val = document.getElementById('unlockInput').value;
+    if (!val) return;
+    unlockTime = new Date(val).getTime();
+    setForm.style.display = 'none';
+    startCountdown();
+  });
+
+  function startCountdown() {
+    if (intervalId) clearInterval(intervalId);
+    tick();
+    intervalId = setInterval(tick, 1000);
+  }
+
+  function tick() {
+    const now = Date.now();
+    const diff = unlockTime - now;
+
+    if (diff <= 0) {
+      clearInterval(intervalId);
+      countdownEl.innerHTML = '';
+      lockIcon.innerText = '🔓';
+      title.innerText = "It's unlocked! 💌";
+      subtext.innerText = '';
+      messageBox.style.display = 'block';
+      return;
+    }
+
+    const d = Math.floor(diff/(1000*60*60*24));
+    const h = Math.floor((diff/(1000*60*60))%24);
+    const m = Math.floor((diff/(1000*60))%60);
+    const s = Math.floor((diff/1000)%60);
+
+    countdownEl.innerHTML = `
+      <div class="unit"><div class="num">${d}</div><div class="label">days</div></div>
+      <div class="unit"><div class="num">${h}</div><div class="label">hrs</div></div>
+      <div class="unit"><div class="num">${m}</div><div class="label">min</div></div>
+      <div class="unit"><div class="num">${s}</div><div class="label">sec</div></div>
+    `;
+  }
+</script>
+</body>
+</html>
